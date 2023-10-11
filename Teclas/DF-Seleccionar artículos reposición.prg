@@ -1,11 +1,7 @@
 *Autor: Darío Flores
-
 *Teclas: ALT+P
-
 *Tipo: Programa
-
 *Última modificación/revisión: 10/10/2023
-
 *Descripción: 
 *  Muestra una pantalla con las cantidades enviadas de los últimos 5 “pedidos de cliente” a un cliente, 
 * y permite introducir las cantidades a pedir. Al aceptar introduce las líneas con la información de 
@@ -33,8 +29,27 @@ If !h And !x Then
    SBO.ShowSave()
 Endif
 
+m_ccusto=bo.ccusto
+
 *	m_ndos alterado para o do pedido a fornecedor (2) (antes era ndos 1 para pedido a cliente) ***** PSS 04OUT2023
-m_ndos=1
+* Sobre qué documento interno vamos a trabajar:
+* El 1 es pedido de cliente.
+* El 2 es pedido a proveedor.
+
+* Si tenemos pulsadas las teclas de control forzamos a pedido de cliente siempre.
+If user_dfControlTeclas()
+	m_ndos=1
+Else
+	m_ndos=2
+	* Si no mostraremos los pedidos a proveedor si hay alguno (aunque sea solo uno) y los pedidos de cliente si no hay ninguna a proveedor:
+	TEXT to sqldatas noshow textmerge
+	   select * from Pedidos_anteriores_ccusto(<<m_ccusto>>,<<m_ndos>>)
+	ENDTEXT
+	If !u_sqlexec(sqldatas,'curPedidos') or reccount()=0
+		m_ndos=1
+	Endif
+
+Endif
 
 
 ****** ########## ROTINA PARA OBTER DADOS DO CCUSTO (TESTE)
@@ -100,7 +115,6 @@ m_titbrow=[Plafond Centro Coste: ]+alltrim(astr(m_plafond))+[ Media Mensual: ]+a
 *	m_ndos=bo.ndos
 m_clno=bo.no
 m_clestab=bo.estab
-m_ccusto=bo.ccusto
 m_dt1=''
 m_dt2=''
 m_dt3=''
@@ -143,8 +157,12 @@ Else
    go top
    Locate For crsdatas.linha='1'
    If Found()
-      * El título de la columna del pedido 1:
-      m_dt1=dtoc(crsdatas.dataobra)+"("+iif(crsdatas.Ordinario, "O", "E")+")"+iif(year(crsdatas.fechaenvio)>1900,"-F.Env.:"+dtoc(crsdatas.fechaenvio),"")
+		* El título de la columna del pedido 1:
+      If m_ndos=1
+	     m_dt1=StrTran(dtoc(crsdatas.dataobra), ".", "/")+"("+iif(crsdatas.Ordinario, "O", "E")+")"+iif(year(crsdatas.fechaenvio)>1900,"-F.Env.:"+StrTran(dtoc(crsdatas.fechaenvio), ".", "/"),"")
+	  Else
+		 m_dt1=StrTran(dtoc(crsdatas.dataobra), ".", "/")+"(P)"+iif(year(crsdatas.fechaenvio)>1900,"-F.Env.:"+StrTran(dtoc(crsdatas.fechaenvio), ".", "/"),"")
+      EndIf
       * Dejamos la fecha en formato yyyymmdd para poder usarla en las consultas
       m_Query_dt1=DToC(crsdatas.dataobra, 1)
       m_Query_Ped1=crsdatas.pedido
@@ -152,7 +170,11 @@ Else
    Select crsdatas
    Locate For crsdatas.linha='2'
    If Found()
-      m_dt2=dtoc(crsdatas.dataobra)+"("+iif(crsdatas.Ordinario, "O", "E")+")"+iif(year(crsdatas.fechaenvio)>1900,"-F.Env.:"+dtoc(crsdatas.fechaenvio),"")
+      If m_ndos=1
+	     m_dt2=StrTran(dtoc(crsdatas.dataobra), ".", "/")+"("+iif(crsdatas.Ordinario, "O", "E")+")"+iif(year(crsdatas.fechaenvio)>1900,"-F.Env.:"+StrTran(dtoc(crsdatas.fechaenvio), ".", "/"),"")
+	  Else
+		 m_dt2=StrTran(dtoc(crsdatas.dataobra), ".", "/")+"(P)"+iif(year(crsdatas.fechaenvio)>1900,"-F.Env.:"+StrTran(dtoc(crsdatas.fechaenvio), ".", "/"),"")
+      EndIf
       * Dejamos la fecha en formato yyyymmdd para poder usarla en las consultas
       m_Query_dt2=DToC(crsdatas.dataobra, 1)
       m_Query_Ped2=crsdatas.pedido
@@ -160,7 +182,11 @@ Else
    Select crsdatas
    Locate For crsdatas.linha='3'
    If Found()
-      m_dt3=dtoc(crsdatas.dataobra)+"("+iif(crsdatas.Ordinario, "O", "E")+")"+iif(year(crsdatas.fechaenvio)>1900,"-F.Env.:"+dtoc(crsdatas.fechaenvio),"")
+      If m_ndos=1
+	     m_dt3=StrTran(dtoc(crsdatas.dataobra), ".", "/")+"("+iif(crsdatas.Ordinario, "O", "E")+")"+iif(year(crsdatas.fechaenvio)>1900,"-F.Env.:"+StrTran(dtoc(crsdatas.fechaenvio), ".", "/"),"")
+	  Else
+		 m_dt3=StrTran(dtoc(crsdatas.dataobra), ".", "/")+"(P)"+iif(year(crsdatas.fechaenvio)>1900,"-F.Env.:"+StrTran(dtoc(crsdatas.fechaenvio), ".", "/"),"")
+      EndIf
       * Dejamos la fecha en formato yyyymmdd para poder usarla en las consultas
       m_Query_dt3=DToC(crsdatas.dataobra, 1)
       m_Query_Ped3=crsdatas.pedido
@@ -168,7 +194,11 @@ Else
    Select crsdatas
    Locate For crsdatas.linha='4'
    If Found()
-      m_dt4=dtoc(crsdatas.dataobra)+"("+iif(crsdatas.Ordinario, "O", "E")+")"+iif(year(crsdatas.fechaenvio)>1900,"-F.Env.:"+dtoc(crsdatas.fechaenvio),"")
+      If m_ndos=1
+	     m_dt4=StrTran(dtoc(crsdatas.dataobra), ".", "/")+"("+iif(crsdatas.Ordinario, "O", "E")+")"+iif(year(crsdatas.fechaenvio)>1900,"-F.Env.:"+StrTran(dtoc(crsdatas.fechaenvio), ".", "/"),"")
+	  Else
+		 m_dt4=StrTran(dtoc(crsdatas.dataobra), ".", "/")+"(P)"+iif(year(crsdatas.fechaenvio)>1900,"-F.Env.:"+StrTran(dtoc(crsdatas.fechaenvio), ".", "/"),"")
+      EndIf
       * Dejamos la fecha en formato yyyymmdd para poder usarla en las consultas
       m_Query_dt4=DToC(crsdatas.dataobra, 1)
       m_Query_Ped4=crsdatas.pedido
@@ -176,7 +206,11 @@ Else
    Select crsdatas
    Locate For crsdatas.linha='5'
    If Found()
-      m_dt5=dtoc(crsdatas.dataobra)+"("+iif(crsdatas.Ordinario, "O", "E")+")"+iif(year(crsdatas.fechaenvio)>1900,"-F.Env.:"+dtoc(crsdatas.fechaenvio),"")
+      If m_ndos=1
+	     m_dt5=StrTran(dtoc(crsdatas.dataobra), ".", "/")+"("+iif(crsdatas.Ordinario, "O", "E")+")"+iif(year(crsdatas.fechaenvio)>1900,"-F.Env.:"+StrTran(dtoc(crsdatas.fechaenvio), ".", "/"),"")
+	  Else
+		 m_dt5=StrTran(dtoc(crsdatas.dataobra), ".", "/")+"(P)"+iif(year(crsdatas.fechaenvio)>1900,"-F.Env.:"+StrTran(dtoc(crsdatas.fechaenvio), ".", "/"),"")
+      EndIf
       * Dejamos la fecha en formato yyyymmdd para poder usarla en las consultas
       m_Query_dt5=DToC(crsdatas.dataobra, 1)
       m_Query_Ped5=crsdatas.pedido
@@ -346,9 +380,9 @@ ENDTEXT
 
 * msg(sqlcommand)
 
-	xFlagEscolha=.F.
+   xFlagEscolha=.F.
    m.escolheu = .F.
-	If u_sqlexec(sqlcommand,'curstref') Then
+   If u_sqlexec(sqlcommand,'curstref') Then
 
 ***** Preencher coluna com quantidade a pedir com informação que consta das linhas do documento ***** PSS 04OUT2023
 		Select curstref
