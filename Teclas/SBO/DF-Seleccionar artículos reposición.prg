@@ -1,12 +1,15 @@
+*****
+* TECLA DE USUARIO
 *Autor: Darío Flores
-*Teclas: ALT+P
+*Tecla: ALT+P
+*Pantalla: SBO
 *Tipo: Programa
 *Última modificación/revisión: 10/10/2023
 *Descripción: 
 *  Muestra una pantalla con las cantidades enviadas de los últimos 5 “pedidos de cliente” a un cliente, 
 * y permite introducir las cantidades a pedir. Al aceptar introduce las líneas con la información de 
 * los artículos y las cantidades introducidas.
-
+*****
 
 x=.F.
 h=.F.
