@@ -4,11 +4,14 @@
 *Tecla: ALT+P
 *Pantalla: SBO
 *Tipo: Programa
-*Última modificación/revisión: 10/10/2023
+*Última modificación/revisión: 19/10/2023
 *Descripción: 
-*  Muestra una pantalla con las cantidades enviadas de los últimos 5 “pedidos de cliente” a un cliente, 
-* y permite introducir las cantidades a pedir. Al aceptar introduce las líneas con la información de 
+* Muestra una pantalla con las cantidades enviadas de los últimos 5 pedidos.
+* Hace una mezcla en esos 5 útimos pedidos, primero pone los pedidos a proveedor y si hay menos de 5 lo rellena con pedidos de cliente.
+* Permite introducir las cantidades a pedir. Al aceptar introduce las líneas con la información de 
 * los artículos y las cantidades introducidas.
+* La pantalla autorellena los artículos con las cantidades del documento actual. Esto sirve para que compras pueda abrir el documento 
+* y ver las cantidades introducidas por el supervisor junto a los últimos 5 pedidos.
 *****
 
 x=.F.
@@ -39,21 +42,28 @@ m_ccusto=bo.ccusto
 * El 1 es pedido de cliente.
 * El 2 es pedido a proveedor.
 
+***
+* Actualización 19/10/2023:
+* A partir de ahora, m_ndos siempre será pedidos a proveedor.
+* La consulta de pedidos anteriores, tendrá en cuenta tanto pedidos a proveedor como pedidos a cliente, para mostrar los 5 últimos:
+
+***
+
 * Si tenemos pulsadas las teclas de control forzamos a pedido de cliente siempre.
-If user_dfControlTeclas()
-	m_ndos=1
-Else
-	m_ndos=2
-	* Si no mostraremos los pedidos a proveedor si hay alguno (aunque sea solo uno) y los pedidos de cliente si no hay ninguna a proveedor:
-	TEXT to sqldatas noshow textmerge
-	   select * from Pedidos_anteriores_ccusto(<<m_ccusto>>,<<m_ndos>>)
-	ENDTEXT
-	If !u_sqlexec(sqldatas,'curPedidos') or reccount()=0
-		m_ndos=1
-	Endif
-
-Endif
-
+*If user_dfControlTeclas()
+*	m_ndos=1
+*Else
+*	m_ndos=2
+*	* Si no mostraremos los pedidos a proveedor si hay alguno (aunque sea solo uno) y los pedidos de cliente si no hay ninguna a proveedor:
+*	TEXT to sqldatas noshow textmerge
+*	   select * from Pedidos_anteriores_ccusto(<<m_ccusto>>,<<m_ndos>>)
+*	ENDTEXT
+*	If !u_sqlexec(sqldatas,'curPedidos') or reccount()=0
+*		m_ndos=1
+*	Endif
+*
+*Endif
+m_ndos=2
 
 ****** ########## ROTINA PARA OBTER DADOS DO CCUSTO (TESTE)
 * Cogemos dirección y plafon y asignamos al parte:
@@ -114,7 +124,6 @@ m_titbrow=[Plafond Centro Coste: ]+alltrim(astr(m_plafond))+[ Media Mensual: ]+a
 ***** ########## FIM DE ROTINA PARA OBTER DADOS DO CCUSTO
 
 
-
 *	m_ndos=bo.ndos
 m_clno=bo.no
 m_clestab=bo.estab
@@ -136,7 +145,11 @@ m_Query_Ped3=0
 m_Query_Ped4=0
 m_Query_Ped5=0
 
-
+m_ndos1=m_ndos
+m_ndos2=m_ndos
+m_ndos3=m_ndos
+m_ndos4=m_ndos
+m_ndos5=m_ndos
 
 if empty(m_clno)
    msg('Por favor, seleccione un cliente antes de intentar seleccionar artículos.')
@@ -145,7 +158,7 @@ endif
 	
 ***** Recolhe datas anteriores, la función de sql server devuelve las últimas 5 fechas de pedido para el cliente y establecimiento dado:
 TEXT to sqldatas noshow textmerge
-   select * from Pedidos_anteriores_ccusto(<<m_ccusto>>,<<m_ndos>>)
+   select * from DF_Pedidos_anteriores_ccusto(<<m_ccusto>>)
 ENDTEXT
 
 *** select * from Datas_anteriores(<<m_clno>>,<<m_clestab>>,<<m_ndos>>)
@@ -158,58 +171,62 @@ Else
    * Ahora vamos cogiendo cada fecha de pedido y la metemos cada una en una variable:
    Select crsdatas
    go top
-   Locate For crsdatas.linha='1'
+   Locate For crsdatas.linea='1'
    If Found()
 		* El título de la columna del pedido 1:
-      If m_ndos=1
+      If crsdatas.ndos=1
 	     m_dt1=StrTran(dtoc(crsdatas.dataobra), ".", "/")+"("+iif(crsdatas.Ordinario, "O", "E")+")"+iif(year(crsdatas.fechaenvio)>1900,"-F.Env.:"+StrTran(dtoc(crsdatas.fechaenvio), ".", "/"),"")
-	  Else
-		 m_dt1=StrTran(dtoc(crsdatas.dataobra), ".", "/")+"(P)"+iif(year(crsdatas.fechaenvio)>1900,"-F.Env.:"+StrTran(dtoc(crsdatas.fechaenvio), ".", "/"),"")
+	   Else
+		  m_dt1=StrTran(dtoc(crsdatas.dataobra), ".", "/")+"(P)"+iif(year(crsdatas.fechaenvio)>1900,"-F.Env.:"+StrTran(dtoc(crsdatas.fechaenvio), ".", "/"),"")
       EndIf
       * Dejamos la fecha en formato yyyymmdd para poder usarla en las consultas
       m_Query_dt1=DToC(crsdatas.dataobra, 1)
       m_Query_Ped1=crsdatas.pedido
+      m_ndos1=crsdatas.ndos
    Endif
    Select crsdatas
-   Locate For crsdatas.linha='2'
+   Locate For crsdatas.linea='2'
    If Found()
-      If m_ndos=1
+      If crsdatas.ndos=1
 	     m_dt2=StrTran(dtoc(crsdatas.dataobra), ".", "/")+"("+iif(crsdatas.Ordinario, "O", "E")+")"+iif(year(crsdatas.fechaenvio)>1900,"-F.Env.:"+StrTran(dtoc(crsdatas.fechaenvio), ".", "/"),"")
-	  Else
-		 m_dt2=StrTran(dtoc(crsdatas.dataobra), ".", "/")+"(P)"+iif(year(crsdatas.fechaenvio)>1900,"-F.Env.:"+StrTran(dtoc(crsdatas.fechaenvio), ".", "/"),"")
+	   Else
+	  	  m_dt2=StrTran(dtoc(crsdatas.dataobra), ".", "/")+"(P)"+iif(year(crsdatas.fechaenvio)>1900,"-F.Env.:"+StrTran(dtoc(crsdatas.fechaenvio), ".", "/"),"")
       EndIf
       * Dejamos la fecha en formato yyyymmdd para poder usarla en las consultas
       m_Query_dt2=DToC(crsdatas.dataobra, 1)
       m_Query_Ped2=crsdatas.pedido
+      m_ndos2=crsdatas.ndos
    Endif
    Select crsdatas
-   Locate For crsdatas.linha='3'
+   Locate For crsdatas.linea='3'
    If Found()
-      If m_ndos=1
+      If crsdatas.ndos=1
 	     m_dt3=StrTran(dtoc(crsdatas.dataobra), ".", "/")+"("+iif(crsdatas.Ordinario, "O", "E")+")"+iif(year(crsdatas.fechaenvio)>1900,"-F.Env.:"+StrTran(dtoc(crsdatas.fechaenvio), ".", "/"),"")
-	  Else
-		 m_dt3=StrTran(dtoc(crsdatas.dataobra), ".", "/")+"(P)"+iif(year(crsdatas.fechaenvio)>1900,"-F.Env.:"+StrTran(dtoc(crsdatas.fechaenvio), ".", "/"),"")
+	   Else
+		  m_dt3=StrTran(dtoc(crsdatas.dataobra), ".", "/")+"(P)"+iif(year(crsdatas.fechaenvio)>1900,"-F.Env.:"+StrTran(dtoc(crsdatas.fechaenvio), ".", "/"),"")
       EndIf
       * Dejamos la fecha en formato yyyymmdd para poder usarla en las consultas
       m_Query_dt3=DToC(crsdatas.dataobra, 1)
       m_Query_Ped3=crsdatas.pedido
+      m_ndos3=crsdatas.ndos
    Endif
    Select crsdatas
-   Locate For crsdatas.linha='4'
+   Locate For crsdatas.linea='4'
    If Found()
-      If m_ndos=1
+      If crsdatas.ndos=1
 	     m_dt4=StrTran(dtoc(crsdatas.dataobra), ".", "/")+"("+iif(crsdatas.Ordinario, "O", "E")+")"+iif(year(crsdatas.fechaenvio)>1900,"-F.Env.:"+StrTran(dtoc(crsdatas.fechaenvio), ".", "/"),"")
-	  Else
-		 m_dt4=StrTran(dtoc(crsdatas.dataobra), ".", "/")+"(P)"+iif(year(crsdatas.fechaenvio)>1900,"-F.Env.:"+StrTran(dtoc(crsdatas.fechaenvio), ".", "/"),"")
+	   Else
+		  m_dt4=StrTran(dtoc(crsdatas.dataobra), ".", "/")+"(P)"+iif(year(crsdatas.fechaenvio)>1900,"-F.Env.:"+StrTran(dtoc(crsdatas.fechaenvio), ".", "/"),"")
       EndIf
       * Dejamos la fecha en formato yyyymmdd para poder usarla en las consultas
       m_Query_dt4=DToC(crsdatas.dataobra, 1)
       m_Query_Ped4=crsdatas.pedido
+      m_ndos4=crsdatas.ndos
    Endif
    Select crsdatas
-   Locate For crsdatas.linha='5'
+   Locate For crsdatas.linea='5'
    If Found()
-      If m_ndos=1
+      If crsdatas.ndos=1
 	     m_dt5=StrTran(dtoc(crsdatas.dataobra), ".", "/")+"("+iif(crsdatas.Ordinario, "O", "E")+")"+iif(year(crsdatas.fechaenvio)>1900,"-F.Env.:"+StrTran(dtoc(crsdatas.fechaenvio), ".", "/"),"")
 	  Else
 		 m_dt5=StrTran(dtoc(crsdatas.dataobra), ".", "/")+"(P)"+iif(year(crsdatas.fechaenvio)>1900,"-F.Env.:"+StrTran(dtoc(crsdatas.fechaenvio), ".", "/"),"")
@@ -217,6 +234,7 @@ Else
       * Dejamos la fecha en formato yyyymmdd para poder usarla en las consultas
       m_Query_dt5=DToC(crsdatas.dataobra, 1)
       m_Query_Ped5=crsdatas.pedido
+      m_ndos5=crsdatas.ndos
    Endif
 Endif
 ***** select dataobra from Datas_anteriores(<<m_clno>>,<<m_clestab>>,<<m_ndos>>)
@@ -252,7 +270,7 @@ TEXT to sqlcommand noshow textmerge
          bo.obrano=<<m_Query_Ped1>> 
          and bi.ref <>'' 
          and bo.ccusto='<<m_ccusto>>' 
-         and bo.ndos=<<m_ndos>>
+         and bo.ndos=<<m_ndos1>>
 
       union all
       select 
@@ -274,7 +292,7 @@ TEXT to sqlcommand noshow textmerge
          bo.obrano=<<m_Query_Ped2>> 
          and bi.ref <>'' 
          and bo.ccusto='<<m_ccusto>>' 
-         and bo.ndos=<<m_ndos>>
+         and bo.ndos=<<m_ndos2>>
 
       union all
       select 
@@ -296,7 +314,7 @@ TEXT to sqlcommand noshow textmerge
          bo.obrano=<<m_Query_Ped3>> 
          and bi.ref <>'' 
          and bo.ccusto='<<m_ccusto>>' 
-         and bo.ndos=<<m_ndos>>
+         and bo.ndos=<<m_ndos3>>
 
       union all
       select 
@@ -318,7 +336,7 @@ TEXT to sqlcommand noshow textmerge
          bo.obrano=<<m_Query_Ped4>> 
          and bi.ref <>'' 
          and bo.ccusto='<<m_ccusto>>' 
-         and bo.ndos=<<m_ndos>>
+         and bo.ndos=<<m_ndos4>>
 
       union all
       select 
@@ -340,7 +358,7 @@ TEXT to sqlcommand noshow textmerge
          bo.obrano=<<m_Query_Ped5>> 
          and bi.ref <>'' 
          and bo.ccusto='<<m_ccusto>>' 
-         and bo.ndos=<<m_ndos>>
+         and bo.ndos=<<m_ndos5>>
       
       union all
       select 
@@ -526,8 +544,6 @@ ENDTEXT
 		Endscan
 
 	Endif
-
-
 
 * Wait Window "SALIR" Timeout 0.3
 Return .F.
