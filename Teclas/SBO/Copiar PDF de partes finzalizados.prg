@@ -1,3 +1,16 @@
+*****
+* TECLA DE USUARIO
+*Autor: Darío Flores
+*Tecla: ALT+Q
+*Pantalla: SBO
+*Tipo: Programa
+*Última modificación/revisión: 19/10/2023
+*Descripción: 
+* Sirve para extraer los PDF de partes finalizados a una carpeta.
+* Lo hace de los partes que tengamos en la lista de registros y solo para 'Partes de trabajo'.
+* Pide la carpeta donde guardar los PDF.
+*****
+
 local lnCount
 
 * Control del documento interno en el que nos encontramos (esta opción es solo para partes de trabajo).

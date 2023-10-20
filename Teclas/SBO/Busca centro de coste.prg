@@ -1,3 +1,17 @@
+*****
+* TECLA DE USUARIO
+*Autor: Darío Flores
+*Tecla: F8
+*Pantalla: SBO
+*Tipo: Programa
+*Última modificación/revisión: 19/10/2023
+*Descripción: 
+* Asignar un centro de coste a la línea en la que estamos.
+* Pide el nombre del centro de coste y lo busca en nombre o código con % delante y detrás.
+* Luego muestra una lista con los centros que coinciden con esos criterios.
+*****
+
+
 TRY
    LOCAL lnALias,lcSql,lcWord,lcCur
    STORE "" TO lcSql,lcWord,lcCur
