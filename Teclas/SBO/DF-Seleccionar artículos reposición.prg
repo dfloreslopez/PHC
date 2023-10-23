@@ -119,7 +119,7 @@ else
 
 endif
 
-m_titbrow=[Plafond Centro Coste: ]+alltrim(astr(m_plafond))+[ Media Mensual: ]+alltrim(astr(m_media))+[ Fecha Cálculo: ]+alltrim(astr(m_datacalc))+[ Último Pedido: ]+alltrim(astr(m_pedido))
+m_titbrow=[Plafond ]+m_ccusto+[: ]+alltrim(astr(m_plafond))+[ Media Mensual: ]+alltrim(astr(m_media))+[ Fecha Cálculo: ]+alltrim(astr(m_datacalc))+[ Último Pedido: ]+alltrim(astr(m_pedido))
 
 ***** ########## FIM DE ROTINA PARA OBTER DADOS DO CCUSTO
 
