@@ -1,3 +1,14 @@
+*****
+* TECLA DE USUARIO
+*Autor: Darío Flores
+*Tecla: CTRL+F8
+*Pantalla: SBO
+*Tipo: Programa
+*Última modificación/revisión: 19/10/2023
+*Descripción: 
+* Muestra una pantalla con los empleados que han realizado visitas en un parte de trabajo.
+*****
+
 TRY
    LOCAL lnALias,lcSql,lcWord,lcCur, cWhere
    STORE "" TO lcSql,lcWord,lcCur

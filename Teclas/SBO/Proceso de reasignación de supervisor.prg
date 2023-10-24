@@ -1,3 +1,15 @@
+*****
+* TECLA DE USUARIO
+*Autor: Darío Flores
+*Tecla: CTRL+F9
+*Pantalla: SBO
+*Tipo: Programa
+*Última modificación/revisión: 19/10/2023
+*Descripción: 
+* La opción solo funciona para los documentos internos de servicios y partes y sirve para modificar el supervisor de los partes de la lista de registros.
+* La lista de registros se puede definir mediante un filtro y se hace una petición del código de supervisor para asignarlo a estos registros.
+*****
+
 TRY
 
    LOCAL lnALias,lcSql,lcWord,lcCur
