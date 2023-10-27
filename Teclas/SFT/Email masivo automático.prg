@@ -10,7 +10,7 @@
 
 * TECLA DE USUARIO
 *Autor: Darío Flores
-*Tecla: F8
+*Tecla: F7
 *Pantalla: SFT
 *Tipo: Programa
 *Última modificación/revisión: 24/10/2023
@@ -19,6 +19,12 @@
 * Pide un texto y lo busca en nombre o código con % delante y detrás.
 * Luego muestra una lista con los centros que coinciden con esos criterios.
 *****
+
+* 2023/10/25: No se puede enviar si estamos editando en el formulario:
+If SFT.Editing Then
+   Msg("No se puede hacer el envío de facturas si la factura actual está el modo edición, cancele o guarde los cambios antes de entrar a esta opción.")
+   Return
+Endif
 
 Select FT
 m_ft_ndoc=FT.ndoc
@@ -227,8 +233,9 @@ If Inlist(m_ft_ndoc,1,12,19,10,16,20,21,17,22,11,18,14,13)  Then
                   Gracias. 
                   Un saludo. 
 
-                  Atte. Vanesa Manresa. 
+                  Cordialmente,
 
+                  Equipo de Facturación
                   GRUPONET 
 
                endtext
