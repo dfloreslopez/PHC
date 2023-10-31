@@ -493,10 +493,10 @@ ENDTEXT
 ***** Eliminar as linhas com referência ***** PSS 04OUT2023
 
       Select bi
-      delete for !empty(bi.ref)
+      * DA 2023/10/31: Borramos los que tengan referencia y estén marcados como artículos que vienen de la selección:
+      delete for !empty(bi.ref) and rTrim(bi.u_obs)='ARTICULOS_SELECCIONADOS'
 
 *****
-
 
 		Select curstref
 		Go Top
@@ -516,7 +516,8 @@ ENDTEXT
 				Replace bi.ref With curstref.ref
 				Replace bi.qtt With curstref.enc
 				Replace bi.Design With curstref.Design
-				select curst
+				
+            select curst
 					Replace bi.forref With curst.forref
 				*					Replace bi.armazem With 11110
 					Replace bi.tabiva With curst.tabiva
@@ -530,6 +531,8 @@ ENDTEXT
 			   Replace bi.efornec with curst.fornec
 			   Replace bi.efornestab with curst.fornestab
 			   Replace bi.efornecedor with curst.fornecedor
+            * DA 2023/10/31: Marcar registros para eliminar solo los que vienen desde la pantalla de "Selección de artículos":
+            Replace bi.u_obs with 'ARTICULOS_SELECCIONADOS'
 				*					Replace bi.edebito With curst.epv1
 				*					Replace bi.ettdeb with curst.epv1*curst.enc
 				select bi
