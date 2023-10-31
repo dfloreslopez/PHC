@@ -1,6 +1,6 @@
 
 /*
-   Grupo: Control Gestión
+   Grupo: Compras
    Descripción: Muestra los pedidos a proveedor para generar el listado para el proveedor de los seleccionados.
    
    Variables:
@@ -8,6 +8,8 @@
       - 2: Tipo D; Nombre "Hasta fecha"
    
 */
+
+
 
 
 
@@ -41,19 +43,17 @@ text to sql1 textmerge noshow
    inner join 
       bi (nolock) on bi.bostamp=bo.bostamp
    inner join 
-      bo3 (nolock) on bo3.bo3stamp=bo.bostamp
-   inner join 
       st (nolock) on bi.ref=st.ref
-   inner join
+   left join
       cu (nolock) on cu.cct=bo.ccusto
-   inner join 
+   left join 
       cl (nolock) on cl.no=cu.u_nocl and cl.estab=cu.u_estabcl
-   inner join 
+   left join 
       cl2 (nolock) on cl2.cl2stamp=cl.clstamp
    where 
       bo.ndos=2
       and bo.dataobra between #1# and #2#
-      and bi.qtt>0 and bo.U_DATAREVP='19000101'
+      and bi.qtt>0 and bo.U_DATAREVP='19000101' and bo.fechada=0
    order by bo.obrano
 endtext
 
@@ -191,21 +191,19 @@ If u_sqlexec(sql1,'PedPro')
                        else 
                            "No"
                        end,
-            InstruccionesEntrega=cu.U_OBSENT,
+            InstruccionesEntrega=cu.U_OBSENT
             
          from 
             bo (nolock)
          inner join 
             bi (nolock) on bi.bostamp=bo.bostamp
          inner join 
-            bo3 (nolock) on bo3.bo3stamp=bo.bostamp
-         inner join 
             st (nolock) on bi.ref=st.ref
-         inner join
+         left join
             cu (nolock) on cu.cct=bo.ccusto
-         inner join 
+         left join 
             cl (nolock) on cl.no=cu.u_nocl and cl.estab=cu.u_estabcl
-         inner join 
+         left join 
             cl2 (nolock) on cl2.cl2stamp=cl.clstamp
          where 
             bi.BISTAMP in ('<<m.stringDoc>>')
@@ -213,7 +211,7 @@ If u_sqlexec(sql1,'PedPro')
 
 		ENDTEXT
       
-      Msg(ExtraccionProveedor)
+      * Msg(ExtraccionProveedor)
 
       u_sqlexec(ExtraccionProveedor,'sqltmp')
 
